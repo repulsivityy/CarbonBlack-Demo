@@ -1,0 +1,9 @@
+#############
+Investigation
+#############
+
+# Search for network exploitation on JNDI: 
+process_cmdline:"jndi:ldap*" OR process_cmdline:"jndi:rmi"
+
+# Search for java.exe spawing a powershell that downlads a file
+process_name:powershell.exe parent_name:java.exe process_cmdline:.downloadfile 

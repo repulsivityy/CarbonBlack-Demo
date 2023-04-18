@@ -1,0 +1,53 @@
+################
+Investigate
+################
+
+# Check if a legitimate app (word), spawns a suspicious program (powershell), with intent on network connectivity
+parent_name:winword.exe AND process_name:powershell.exe AND childproc_name:conhost.exe
+
+# Check for suspicious powershell usage (hidden, encrypted, etc)
+process_name:powershell.exe AND (process_cmdline:"-Enc" OR process_cmdline:"hidden" OR process_cmdline:"-Exec")
+
+# Check for possible lateral movement with powershell 
+process_name:powershell.exe AND process_cmdline:IEX AND netconn_count:[1 TO *] AND netconn_ipv4:192.168.230.0/24
+
+# Check for persistence by modifying registry keys
+(regmod_name:HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\*)
+
+# Check for potential data exfiltration by not listed processes
+(parent_effective_reputation:Not_Listed OR process_reputation:NOT_Listed) AND (netconn_count:[1 TO *] OR netconn_bytes_sent:[1 TO *])
+
+################
+Live Response
+################
+
+# Send popup message to terminal
+execfg msg * SecOps team needs to take control. Please save all your work now. For more information, please call your IT helpdesk.
+
+# check powershell execution policy
+execfg powershell get-executionpolicy
+
+# if persistence seen (from above)
+reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
+
+# Upload files / own tools
+put c:\users\dominicc1\desktop
+
+# Memory Dump
+memdump c:\users\dominicc1\desktop\memdump.dmp
+
+# Download files for further investigations
+cd C:\Users\dominicc1\Desktop
+execfg powershell compress-archive memdump.dmp machine1_artifects.zip, OR
+execfg powershell compress-archive netstat.txt machine1_artifects.zip
+get machine1_artifects.zip
+
+
+################
+Live Query
+################
+# Check Scheduled Tasks
+SELECT * FROM scheduled_tasks;
+
+# Check if UAC is disabled
+SELECT * FROM registryWHERE path='HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\EnableLUA' AND data=0;

