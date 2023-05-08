@@ -5,6 +5,12 @@ Investigate
 # Check if a legitimate app (word), spawns a suspicious program (powershell), with intent on network connectivity
 parent_name:winword.exe AND process_name:powershell.exe AND childproc_name:conhost.exe
 
+# Check if Email Clients Opening a Browser, and executing an unlisted/resolving executable on endpoint
+((parent_name:thunderbird.exe OR parent_name:outlook.exe) AND (process_name:msedge.exe OR process_name:chrome.exe OR process_name:firefox.exe) AND ((childproc_reputation:NOT_LISTED OR childproc_reputation: RESOLVING) AND (childproc_name:*.exe)))
+
+# Check for browsers executing a PE from an unknown or unsigned file publisher
+((process_name:iexplore.exe OR process_name:firefox.exe OR process_name:chrome.exe) AND (filemod_name:*.exe OR filemod_name:*.dll) AND (filemod_publisher_state:FILE_SIGNATURE_STATE_NOT_SIGNED OR filemod_publisher_state:FILE_SIGNATURE_STATE_UNKNOWN))
+
 # Check for suspicious powershell usage (hidden, encrypted, etc)
 process_name:powershell.exe AND (process_cmdline:"-Enc" OR process_cmdline:"hidden" OR process_cmdline:"-Exec")
 
@@ -16,6 +22,16 @@ process_name:powershell.exe AND process_cmdline:IEX AND netconn_count:[1 TO *] A
 
 # Check for potential data exfiltration by not listed processes
 (parent_effective_reputation:Not_Listed OR process_reputation:NOT_Listed) AND (netconn_count:[1 TO *] OR netconn_bytes_sent:[1 TO *])
+
+# Check for potential memory injections from powershell or notepad
+(parent_name:powershell.exe AND process_name:notepad.exe AND (ttp:MODIFY_PROCESS OR ttp:MODIFY_MEMORY_PROTECTION))
+
+
+XDR Module: 
+
+# Check for potential beacon-like behaviour
+process_effective_reputation:NOT_LISTED AND netconn_request_method:POST AND netconn_count:[10 TO *] 
+
 
 ################
 Live Response
