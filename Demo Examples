@@ -2,6 +2,7 @@
 Investigate
 ################
 
+## Initial Access ##
 # Check if a legitimate app (word), spawns a suspicious program (powershell), with intent on network connectivity
 parent_name:winword.exe AND process_name:powershell.exe AND childproc_name:conhost.exe
 
@@ -11,24 +12,54 @@ parent_name:winword.exe AND process_name:powershell.exe AND childproc_name:conho
 # Check for browsers executing a PE from an unknown or unsigned file publisher
 ((process_name:iexplore.exe OR process_name:firefox.exe OR process_name:chrome.exe) AND (filemod_name:*.exe OR filemod_name:*.dll) AND (filemod_publisher_state:FILE_SIGNATURE_STATE_NOT_SIGNED OR filemod_publisher_state:FILE_SIGNATURE_STATE_UNKNOWN))
 
+
+## Persistance ##
+# Check for vbs scripts running in TEMP folders
+((filemod_name:\\Temp\\*) AND (filemod_name:*.vbs))
+
+# Check for changes in startup registry (Currentversion\run)
+((regmod_name:software\\microsoft\\windows\\currentversion\\run*) AND NOT (process_name:onedrivesetup.exe OR process_name:msedge.exe OR process_name:Runonce.exe) -enriched:true)
+
+# Check for persistence by modifying registry keys
+(regmod_name:HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\*)
+
+# Creation of local accounts into local admin group
+(((process_name:net.exe AND (process_cmdline:\/add AND (process_cmdline:"local\ group\ users" OR process_cmdline:"localgroup\ administrators" OR process_cmdline:user)))) -enriched:true)
+
+
+## Privilege Escalation ##
+# Check for any named pipes in Windows
+((((process_cmdline:"\/c\ echo" AND process_cmdline:".\ pipe\\") AND -(crossproc_name:edpa.exe OR crossproc_name:defendpointservice.exe)) AND device_os:WINDOWS) -enriched:true)
+
+# Known technique (Fodhelper)
+((parent_name:fodhelper.exe) AND (process_name:powershell.exe (process_cmdline:\-e* OR process_cmdline:unrestricted OR process_cmdline:bypass OR process_cmdline:iex OR process_cmdline:nop)) -enriched:true)
+
+## Evasion ##
+# Check for process injections techniques by powershell into notepad
+(parent_name:powershell.exe AND process_name:notepad.exe AND (ttp:MODIFY_PROCESS OR ttp:MODIFY_MEMORY_PROTECTION))
+
+## Exfiltration ##
+# Check for potential data exfiltration by not listed processes
+(parent_effective_reputation:Not_Listed OR process_reputation:NOT_Listed) AND (netconn_count:[1 TO *] OR netconn_bytes_sent:[1 TO *])
+
+## Impact ##
+# Check for VSSadmin.exe running suspicious commands (eg, delete, quiet, etc)
+(((process_cmdline:vssadmin.exe OR process_cmdline:vssadmin) AND process_cmdline:shadows process_cmdline:delete process_cmdline:\/quiet) -enriched:true)
+
+# Check for WMIC with suspicious commands around shadow copies
+(((process_cmdline:wmic OR process_cmdline:wmic.exe) AND process_cmdline:shadowcopy process_cmdline:delete) -enriched:true)
+
+## Others ##
 # Check for suspicious powershell usage (hidden, encrypted, etc)
 process_name:powershell.exe AND (process_cmdline:"-Enc" OR process_cmdline:"hidden" OR process_cmdline:"-Exec")
 
 # Check for possible lateral movement with powershell 
 process_name:powershell.exe AND process_cmdline:IEX AND netconn_count:[1 TO *] AND netconn_ipv4:192.168.230.0/24
 
-# Check for persistence by modifying registry keys
-(regmod_name:HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\*)
-
-# Check for potential data exfiltration by not listed processes
-(parent_effective_reputation:Not_Listed OR process_reputation:NOT_Listed) AND (netconn_count:[1 TO *] OR netconn_bytes_sent:[1 TO *])
-
-# Check for potential memory injections from powershell or notepad
-(parent_name:powershell.exe AND process_name:notepad.exe AND (ttp:MODIFY_PROCESS OR ttp:MODIFY_MEMORY_PROTECTION))
-
 
 XDR Module: 
 
+## Command and Control ##
 # Check for potential beacon-like behaviour
 process_effective_reputation:NOT_LISTED AND netconn_request_method:POST AND netconn_count:[10 TO *] 
 
