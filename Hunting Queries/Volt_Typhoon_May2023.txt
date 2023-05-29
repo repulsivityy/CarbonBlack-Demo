@@ -15,6 +15,9 @@ Create Proxies on compromised systems to facilicate access
 Create install media from domain controllers
 - cmd.exe /c ntdsutil "ac i ntds" ifm "create full c:\Windows\Temp\pro" q q
 
+######
+Investigate
+######
 
 Queries to search for Volt Typhoon in your environment: 
 
