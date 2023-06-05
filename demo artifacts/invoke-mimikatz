@@ -1,3 +1,9 @@
+Open Powershell as Administrator
+run "set-executionpolicy bypass" 
+validate that the policy is on bypass with "get-executionpolicy"
+
+Once done - run either of the below
+
 ####
 actual encoded command: 
 
