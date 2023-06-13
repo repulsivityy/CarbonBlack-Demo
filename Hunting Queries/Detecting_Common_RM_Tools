@@ -1,0 +1,57 @@
+Side Project...
+
+Purpose of this project is to build a list of known remote management tools and understand what files & directory it uses/touches, registry creations and modifications, and network related telemetry in order to better investigate for any suspicious or abnormal usage. 
+
+################################
+Remote Desktop Protocol
+################################
+A good starting point since many organisations are on windows, and would use the inbuilt tool. Commonly used for jumphosts to access sensitive environments, like server farms, critical servers, cloud workloads, etc. 
+
+################################
+###### When Enabling RDP #######
+################################
+
+Registry: 
+HKLM\System\CurrentControlSet\Control\Terminal Server\fDenyTSConnections
+-- Via powershell:
+Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -value 0  ---> created by authorised users only
+-- Via cmd:
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
+
+HKLM\System\CurrentControlSet\Control\Class\{random}\0133\DriverVersion ---> created by NT AUTHORITY\SYSTEM
+HKLM\System\CurrentControlSet\Control\Terminal Server\updateRDStatus
+
+Processes:
+"C:\Windows\system32\SystemSettingsAdminFlows.exe" RemoteDesktopTurnOnRdp - (ProcessCreate / NtAllocateVirtualMemory) ---> Created by authorised users only
+C:\Windows\System32\svchost.exe -k termsvcs -s TermService (ProcessCreate) ---> Created by NT AUTHORITY\NETWORK SERVICE
+C:\Windows\System32\svchost.exe -k LocalSystemNetworkRestricted -p -s UmRdpService (ProcessCreate) ---> NT AUTHORITY\SYSTEM
+
+Users:
+Should only be done by authorised users and NT/SYSTEM
+
+
+## When disabling NLA ## 
+Processes:
+C:\Windows\system32\SystemSettingsAdminFlows.exe" RemoteDesktopTurnOffNla (ProcessCreate) ---> Created by authorised users only
+
+Registry: 
+HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp\UserAuthentication
+
+## Detecting with Carbon Black Endpoint Enterprise / Enterprise EDR ##
+
+To detect when RDP setting is changed in your environment:
+- (regmod_name:HKLM\\System\\CurrentControlSet\\Control\\Terminal\ Server\\updateRDStatus) OR (regmod_name:HKLM\\System\\CurrentControlSet\\Control\\Terminal\ Server\\fDenyTSConnections)
+
+To detect when NLA is disabled in your environment: 
+- (regmod_name:HKLM\\System\\CurrentControlSet\\Control\\Terminal\ Server\\WinStations\\RDP\-Tcp\\UserAuthentication)
+- process_name:SystemSettingsAdminFlows.exe AND process_cmdline:RemoteDesktopTurnOffNla
+
+
+################################
+###### Connecting on RDP #######
+################################
+
+Network: 
+- Uses Remote Desktop Protocol
+- Encapsulated and encrypted over TCP 
+- Typically uses port 3389
