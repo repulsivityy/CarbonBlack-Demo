@@ -1,5 +1,5 @@
 ################################
-Remote Desktop Protocol
+ Remote Desktop Protocol
 ################################
 A good starting point since many organisations are on windows, and would use the inbuilt tool. Commonly used for jumphosts to access sensitive environments, like server farms, critical servers, cloud workloads, etc. 
 
