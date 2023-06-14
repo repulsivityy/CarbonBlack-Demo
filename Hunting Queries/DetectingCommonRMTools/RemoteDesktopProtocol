@@ -37,10 +37,9 @@ Users: Should only be done by authorised users and NT/SYSTEM
 
 
 ## When disabling NLA ## 
-Attackers may use this 
 
 Processes:
-C:\Windows\system32\SystemSettingsAdminFlows.exe" RemoteDesktopTurnOffNla (ProcessCreate) ---> Created by authorised users only
+"C:\Windows\system32\SystemSettingsAdminFlows.exe" RemoteDesktopTurnOffNla (ProcessCreate) ---> Created by authorised users only
 
 Registry: 
 HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp\UserAuthentication
