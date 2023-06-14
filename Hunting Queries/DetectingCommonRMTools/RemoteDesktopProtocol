@@ -3,6 +3,17 @@ Remote Desktop Protocol
 ################################
 A good starting point since many organisations are on windows, and would use the inbuilt tool. Commonly used for jumphosts to access sensitive environments, like server farms, critical servers, cloud workloads, etc. 
 
+Typical Behaviour: 
+
+Network: 
+- Uses Remote Desktop Protocol
+- Encapsulated and encrypted over TCP 
+- Typically uses port 3389
+
+DLLs used for RDP:
+- mstscax.dll - Remote Desktop ActiveX Control used to create and manage RDP sessions
+- rdpcorets.dll - Core functionality of the RDP protocol
+
 ################################
 ###### When Enabling RDP #######
 ################################
@@ -52,17 +63,15 @@ FROM registry
 WHERE PATH="HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp\UserAuthentication";
 
 
-
 ################################
 ###### Connecting on RDP #######
 ################################
 
-Network: 
-- Uses Remote Desktop Protocol
-- Encapsulated and encrypted over TCP 
-- Typically uses port 3389
+Detecting outbound connection on non-standard RDP port (Client -> Server)
+- process_name:mstsc.exe AND (netconn_inbound:false AND (netconn_application_protocol:RDP OR (netconn_protocol:PROTO_TCP OR netconn_protocol:PROTO_UDP)) AND NOT netconn_port:3389)  #XDR module required
 
-DLLs used for RDP:
-mstscax.dll - Remote Desktop ActiveX Control used to create and manage RDP sessions
-rdpcorets.dll - Core functionality of the RDP protocol
+Detecting inbound connection on non-standard RDP port
+- process_name:mstsc.exe AND (netconn_inbound:true AND (netconn_application_protocol:RDP OR (netconn_protocol:PROTO_TCP OR netconn_protocol:PROTO_UDP)) AND NOT netconn_port:3389)  #XDR module required
 
+Detecting presense of a RDP sessions established
+- process_name:mstsc.exe AND netconn_count:[1 TO *]
