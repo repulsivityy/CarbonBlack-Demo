@@ -14,14 +14,13 @@ DLLs used for RDP:
 - mstscax.dll - Remote Desktop ActiveX Control used to create and manage RDP sessions
 - rdpcorets.dll - Core functionality of the RDP protocol
 
-################################
-###### When Enabling RDP #######
-################################
+##################################
+###### When RDP is enabled #######
+##################################
 -- Via powershell:
 Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -value 0  ---> created by authorised users only
 -- Via cmd:
 reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
-
 
 Registry Keys:
 HKLM\System\CurrentControlSet\Control\Terminal Server\fDenyTSConnections
@@ -35,8 +34,7 @@ Processes:
 
 Users: Should only be done by authorised users and NT/SYSTEM
 
-
-## When disabling NLA ## 
+### When disabling NLA ###
 
 Processes:
 "C:\Windows\system32\SystemSettingsAdminFlows.exe" RemoteDesktopTurnOffNla (ProcessCreate) ---> Created by authorised users only
@@ -44,7 +42,9 @@ Processes:
 Registry: 
 HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp\UserAuthentication
 
-### Detecting with Carbon Black Cloud ###
+### 
+### Carbon Black Cloud Queries ###
+###
 
 To detect when RDP setting is changed in your environment:
 - (regmod_name:HKLM\\System\\CurrentControlSet\\Control\\Terminal\ Server\\updateRDStatus) OR (regmod_name:HKLM\\System\\CurrentControlSet\\Control\\Terminal\ Server\\fDenyTSConnections)  #run in process tab
@@ -62,9 +62,13 @@ FROM registry
 WHERE PATH="HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp\UserAuthentication";
 
 
-################################
-###### Connecting on RDP #######
-################################
+##################################
+##### When RDP is connected ######
+##################################
+
+###
+### Carbon Black Cloud Queries ###
+###
 
 Detecting outbound connection on non-standard RDP port (Client -> Server)
 - process_name:mstsc.exe AND (netconn_inbound:false AND (netconn_application_protocol:RDP OR (netconn_protocol:PROTO_TCP OR netconn_protocol:PROTO_UDP)) AND NOT netconn_port:3389)  #XDR module required
