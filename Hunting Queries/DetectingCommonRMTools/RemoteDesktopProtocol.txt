@@ -8,7 +8,7 @@ A good starting point since many organisations are on windows, and would use the
 ################################
 
 Registry Keys:
- 
+
 HKLM\System\CurrentControlSet\Control\Terminal Server\fDenyTSConnections
 -- Via powershell:
 Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -value 0  ---> created by authorised users only
@@ -19,7 +19,7 @@ HKLM\System\CurrentControlSet\Control\Class\{random}\0133\DriverVersion ---> cre
 HKLM\System\CurrentControlSet\Control\Terminal Server\updateRDStatus
 
 Processes:
-"C:\Windows\system32\SystemSettingsAdminFlows.exe" RemoteDesktopTurnOnRdp - (ProcessCreate / NtAllocateVirtualMemory) ---> Created by authorised users only
+C:\Windows\system32\SystemSettingsAdminFlows.exe RemoteDesktopTurnOnRdp - (ProcessCreate / NtAllocateVirtualMemory) ---> Created by authorised users only
 C:\Windows\System32\svchost.exe -k termsvcs -s TermService (ProcessCreate) ---> Created by NT AUTHORITY\NETWORK SERVICE
 C:\Windows\System32\svchost.exe -k LocalSystemNetworkRestricted -p -s UmRdpService (ProcessCreate) ---> NT AUTHORITY\SYSTEM
 
