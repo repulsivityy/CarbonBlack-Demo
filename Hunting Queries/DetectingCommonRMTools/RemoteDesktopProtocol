@@ -73,8 +73,8 @@ WHERE PATH="HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\
 Detecting outbound connection on non-standard RDP port (Client -> Server)
 - process_name:mstsc.exe AND (netconn_inbound:false AND (netconn_application_protocol:RDP OR (netconn_protocol:PROTO_TCP OR netconn_protocol:PROTO_UDP)) AND NOT netconn_port:3389)  #XDR module required
 
-Detecting inbound connection on non-standard RDP port
+Detecting inbound connection on non-standard RDP port (Server -> Client)
 - process_name:mstsc.exe AND (netconn_inbound:true AND (netconn_application_protocol:RDP OR (netconn_protocol:PROTO_TCP OR netconn_protocol:PROTO_UDP)) AND NOT netconn_port:3389)  #XDR module required
 
-Detecting presense of a RDP sessions established
+Detecting presence of a RDP sessions established
 - process_name:mstsc.exe AND netconn_count:[1 TO *]
