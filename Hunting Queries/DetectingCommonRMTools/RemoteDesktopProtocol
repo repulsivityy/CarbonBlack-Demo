@@ -6,25 +6,23 @@ A good starting point since many organisations are on windows, and would use the
 ################################
 ###### When Enabling RDP #######
 ################################
-
-Registry Keys:
-
-HKLM\System\CurrentControlSet\Control\Terminal Server\fDenyTSConnections
 -- Via powershell:
 Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -value 0  ---> created by authorised users only
 -- Via cmd:
 reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
 
+
+Registry Keys:
+HKLM\System\CurrentControlSet\Control\Terminal Server\fDenyTSConnections
 HKLM\System\CurrentControlSet\Control\Class\{random}\0133\DriverVersion ---> created by NT AUTHORITY\SYSTEM
 HKLM\System\CurrentControlSet\Control\Terminal Server\updateRDStatus
 
 Processes:
-C:\Windows\system32\SystemSettingsAdminFlows.exe RemoteDesktopTurnOnRdp - (ProcessCreate / NtAllocateVirtualMemory) ---> Created by authorised users only
-C:\Windows\System32\svchost.exe -k termsvcs -s TermService (ProcessCreate) ---> Created by NT AUTHORITY\NETWORK SERVICE
-C:\Windows\System32\svchost.exe -k LocalSystemNetworkRestricted -p -s UmRdpService (ProcessCreate) ---> NT AUTHORITY\SYSTEM
+- C:\Windows\system32\SystemSettingsAdminFlows.exe RemoteDesktopTurnOnRdp - (ProcessCreate / NtAllocateVirtualMemory) ---> Created by authorised users only
+- C:\Windows\System32\svchost.exe -k termsvcs -s TermService (ProcessCreate) ---> Created by NT AUTHORITY\NETWORK SERVICE
+- C:\Windows\System32\svchost.exe -k LocalSystemNetworkRestricted -p -s UmRdpService (ProcessCreate) ---> NT AUTHORITY\SYSTEM
 
-Users:
-Should only be done by authorised users and NT/SYSTEM
+Users: Should only be done by authorised users and NT/SYSTEM
 
 
 ## When disabling NLA ## 
@@ -34,14 +32,23 @@ C:\Windows\system32\SystemSettingsAdminFlows.exe" RemoteDesktopTurnOffNla (Proce
 Registry: 
 HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp\UserAuthentication
 
-## Detecting with Carbon Black Endpoint Enterprise / Enterprise EDR ##
+### Detecting with Carbon Black Cloud ###
 
 To detect when RDP setting is changed in your environment:
-- (regmod_name:HKLM\\System\\CurrentControlSet\\Control\\Terminal\ Server\\updateRDStatus) OR (regmod_name:HKLM\\System\\CurrentControlSet\\Control\\Terminal\ Server\\fDenyTSConnections)
+- (regmod_name:HKLM\\System\\CurrentControlSet\\Control\\Terminal\ Server\\updateRDStatus) OR (regmod_name:HKLM\\System\\CurrentControlSet\\Control\\Terminal\ Server\\fDenyTSConnections)  #run in process tab
 
-To detect when NLA is disabled in your environment: 
-- (regmod_name:HKLM\\System\\CurrentControlSet\\Control\\Terminal\ Server\\WinStations\\RDP\-Tcp\\UserAuthentication)
+To detect when NLA is changed in your environment: 
+- (regmod_name:HKLM\\System\\CurrentControlSet\\Control\\Terminal\ Server\\WinStations\\RDP\-Tcp\\UserAuthentication)  #run in process tab
 - (process_name:SystemSettingsAdminFlows.exe) AND (process_cmdline:RemoteDesktopTurnOffNla)
+
+LiveQuery: 
+SELECT CASE DATA
+           WHEN 0 THEN "Disabled"
+           WHEN 1 THEN "Enabled"
+       END "RDP NLA Status"
+FROM registry
+WHERE PATH="HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp\UserAuthentication";
+
 
 
 ################################
