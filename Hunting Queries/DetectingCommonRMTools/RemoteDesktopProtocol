@@ -26,6 +26,8 @@ Users: Should only be done by authorised users and NT/SYSTEM
 
 
 ## When disabling NLA ## 
+Attackers may use this 
+
 Processes:
 C:\Windows\system32\SystemSettingsAdminFlows.exe" RemoteDesktopTurnOffNla (ProcessCreate) ---> Created by authorised users only
 
@@ -59,3 +61,8 @@ Network:
 - Uses Remote Desktop Protocol
 - Encapsulated and encrypted over TCP 
 - Typically uses port 3389
+
+DLLs used for RDP:
+mstscax.dll - Remote Desktop ActiveX Control used to create and manage RDP sessions
+rdpcorets.dll - Core functionality of the RDP protocol
+
