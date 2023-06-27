@@ -14,6 +14,8 @@ DLLs used for RDP:
 - mstscax.dll - Remote Desktop ActiveX Control used to create and manage RDP sessions
 - rdpcorets.dll - Core functionality of the RDP protocol
 
+Path to executable: c:\Windows\System32\mstsc.exe
+
 ##################################
 ###### When RDP is enabled #######
 ##################################
