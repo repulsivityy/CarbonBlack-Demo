@@ -19,6 +19,7 @@ Path to executable: c:\Windows\System32\mstsc.exe
 ##################################
 ###### When RDP is enabled #######
 ##################################
+Enabling RDP via commandline:
 -- Via powershell:
 Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -value 0  ---> created by authorised users only
 -- Via cmd:
@@ -50,6 +51,15 @@ HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp\UserAu
 
 To detect when RDP setting is changed in your environment:
 - (regmod_name:HKLM\\System\\CurrentControlSet\\Control\\Terminal\ Server\\updateRDStatus) OR (regmod_name:HKLM\\System\\CurrentControlSet\\Control\\Terminal\ Server\\fDenyTSConnections)  #run in process tab
+
+LiveQuery:
+SELECT CASE DATA
+           WHEN 0 THEN "Enabled"
+           WHEN 1 THEN "Disabled"
+       END "RDP Status"
+FROM registry
+WHERE PATH="HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\fDenyTSConnections";
+
 
 To detect when NLA is changed in your environment: 
 - (regmod_name:HKLM\\System\\CurrentControlSet\\Control\\Terminal\ Server\\WinStations\\RDP\-Tcp\\UserAuthentication)  #run in process tab
